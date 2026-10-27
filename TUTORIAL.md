@@ -1088,6 +1088,14 @@ the run.`** A typo at the stage 4 prompt. The prompt asks again; type the
 name as it appears in the `EEG (30):` list at the top. Separate several names
 with commas: `PO8, F7`.
 
+**`Cannot find .../template/layout/easycapM1.mat`** (or `standard_1020.elc`).
+Your FieldTrip copy lacks its `template` folder. This happens with a
+half-finished unzip, a "lite" download, or when the `template` folder was
+deleted to save space. Download the full FieldTrip archive again, unzip all
+of it, point `addpath` at the new folder and run `cpsy1197_check`, which tests
+for both files. If you have two FieldTrip copies, remove the old one from
+the path first (`rmpath`).
+
 **`Type component numbers between 1 and 29, for example 1 or 1, 4.`** The
 stage 5 prompt wants numbers. It asks again.
 

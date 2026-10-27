@@ -87,7 +87,15 @@ p.visualCheck = ft_getopt(params, 'visualCheck', p.interactive);
 % every one of these 30 channels inside the outline (checked).
 p.elecfile    = ft_getopt(params, 'elecfile', fullfile(fileparts(which('ft_defaults')), ...
                           'template', 'electrode', 'standard_1020.elc'));
-p.layout      = ft_getopt(params, 'layout',      'easycapM1.mat');
+p.layout      = ft_getopt(params, 'layout', fullfile(fileparts(which('ft_defaults')), ...
+                          'template', 'layout', 'easycapM1.mat'));
+for f = {p.elecfile, p.layout}
+    if ~exist(f{1}, 'file')
+        error(['Cannot find %s\nYour FieldTrip copy is incomplete (the template ' ...
+               'folder is missing or empty). Download FieldTrip again, unzip the ' ...
+               'whole archive, and point addpath at the new folder.'], f{1});
+    end
+end
 
 % presets, used when interactive is false (testing, or re-running a decision)
 p.badChannels = ft_getopt(params, 'badChannels', {});

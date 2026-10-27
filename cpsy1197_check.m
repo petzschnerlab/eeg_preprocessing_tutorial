@@ -31,12 +31,15 @@ else
     end
     % The electrode positions that rebuild removed channels and draw the
     % topographies come with FieldTrip.
-    elecfile = fullfile(ftpath, 'template', 'electrode', 'standard_1020.elc');
-    if ~exist(elecfile, 'file')
-        fprintf(['MISSING: %s\n' ...
-                 'Your FieldTrip copy is incomplete. Download it again, unzip the\n' ...
-                 'whole archive, and point addpath at the new folder.\n'], elecfile);
-        ok = false;
+    templates = {fullfile(ftpath, 'template', 'electrode', 'standard_1020.elc'), ...
+                 fullfile(ftpath, 'template', 'layout', 'easycapM1.mat')};
+    for t = templates
+        if ~exist(t{1}, 'file')
+            fprintf(['MISSING: %s\n' ...
+                     'Your FieldTrip copy is incomplete. Download it again, unzip the\n' ...
+                     'whole archive, and point addpath at the new folder.\n'], t{1});
+            ok = false;
+        end
     end
 end
 
