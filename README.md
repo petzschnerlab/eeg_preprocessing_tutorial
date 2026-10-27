@@ -47,14 +47,13 @@ your experiment: 125 uV for the P3b, 100 uV for the N170 and the N400. Then you 
 ## Saving and submitting
 
 ```matlab
-save('data/1/1_P3_clean.mat', '-struct', 'out');   % stays on your machine
 cpsy1197_report(out, 'Your Name');                  % paste the block it prints
 ```
 
-The console prints the `save` line with the right file name for each
-participant. The pipeline also writes a small summary file next to the raw
-data, for example `data/1/1_P3_summary.mat`, with your decision log and the
-per-condition averages. That file goes to Canvas; the cleaned data does not.
+The pipeline saves two files next to the raw data. The cleaned data, for
+example `data/1/1_P3_clean.mat`, stays on your machine. The small summary
+file, for example `data/1/1_P3_summary.mat`, holds your decision log and the
+per-condition averages. That one goes to Canvas.
 
 ## If something breaks
 

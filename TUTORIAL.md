@@ -460,9 +460,9 @@ removed in this window, they were decided at stage 4.
   target            34 trials averaged
   standard         150 trials averaged
 Saved data/1/1_P3_summary.mat (60 kB).
+Saved data/1/1_P3_clean.mat (10.7 MB). Keep it on your machine, do not upload it.
 
-Done. Keep the cleaned data on your machine, then print your report:
-  save('data/1/1_P3_clean.mat', '-struct', 'out');
+Done. Now print your report:
   cpsy1197_report(out, 'Your Name')
 ```
 
@@ -470,11 +470,11 @@ The pipeline wrote a small summary file next to the raw data. It contains
 your full decision log and the average waveform of each condition, and it is
 the file you upload to Canvas. It is deliberately small: about 60 kB, or
 120 kB for the N170, which has four conditions, so ten of them come to about
-a megabyte. Your full cleaned data stays on your machine; run the two lines
-the console suggests:
+a megabyte. Your full cleaned data is saved next to it as
+`data/1/1_P3_clean.mat`. Keep that file on your machine, you need it in
+November. Then print your submission block:
 
 ```matlab
-save('data/1/1_P3_clean.mat', '-struct', 'out');   % keep this, you need it in November
 cpsy1197_report(out, 'Your Name');                  % prints your submission block
 ```
 
@@ -969,8 +969,8 @@ For each of your assigned participants, in order:
 
 1. Run the pipeline and make your three decisions as you go, for example
    `out = cpsy1197_preprocess('data/12/12_N400.set');`.
-2. Save the cleaned data locally, with the line the console suggests, for
-   example `save('data/12/12_N400_clean.mat','-struct','out')`.
+2. The pipeline saves the cleaned data next to the raw file, for example
+   `data/12/12_N400_clean.mat`. Keep it locally.
 3. Run `cpsy1197_report(out, 'Your Name')` and copy the printed block into
    your preprocessing summary document.
 4. Collect the summary files (for example `data/12/12_N400_summary.mat`);

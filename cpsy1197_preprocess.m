@@ -714,8 +714,11 @@ fprintf('Saved %s (%.0f kB).\n', summaryFile, d.bytes/1024);
 
 %% --------------------------------------------------------------------- DONE
 out = struct('data', data, 'log', log, 'avg', avg);
-fprintf('\nDone. Keep the cleaned data on your machine, then print your report:\n');
-fprintf('  save(''%s'', ''-struct'', ''out'');\n', fullfile(fdir, [fbase '_clean.mat']));
+cleanFile = fullfile(fdir, [fbase '_clean.mat']);
+save(cleanFile, '-struct', 'out');
+d = dir(cleanFile);
+fprintf('Saved %s (%.1f MB). Keep it on your machine, do not upload it.\n', cleanFile, d.bytes/1024^2);
+fprintf('\nDone. Now print your report:\n');
 fprintf('  cpsy1197_report(out, ''Your Name'')\n\n');
 end
 
