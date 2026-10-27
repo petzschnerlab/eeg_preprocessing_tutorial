@@ -1,0 +1,10 @@
+# Data (never commit)
+data/
+*.set
+*.fdt
+*.mat
+
+# macOS / MATLAB
+.DS_Store
+*.asv
+*.m~
