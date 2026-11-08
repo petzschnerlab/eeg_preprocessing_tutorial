@@ -9,7 +9,10 @@ from the real data and the exact console output to compare against, is in
 | `cpsy1197_check.m` | One command that says if you can start or what is missing. |
 | `cpsy1197_preprocess.m` | The full preprocessing pipeline. |
 | `cpsy1197_report.m` | Prints the numbers for your submission. |
+| `cpsy1197_average_within.m` | Averages the trials of each participant, per condition (for 10 November). |
+| `cpsy1197_average_across.m` | Averages the participants into a grand average and draws it (for 10 November). |
 | `TUTORIAL.md` | The walkthrough. Start here. |
+| `TUTORIAL_Averaging.md` | The second walkthrough: averaging, for 10 November. |
 
 ## First run
 
@@ -54,6 +57,16 @@ The pipeline saves two files next to the raw data. The cleaned data, for
 example `data/1/1_P3_clean.mat`, stays on your machine. The small summary
 file, for example `data/1/1_P3_summary.mat`, holds your decision log and the
 per-condition averages. That one goes to Canvas.
+
+## Averaging, from 10 November
+
+The two averaging scripts work on the `_clean.mat` files your preprocessing saved.
+**[TUTORIAL_Averaging.md](TUTORIAL_Averaging.md)** explains them.
+
+```matlab
+cpsy1197_average_within('data')       % one ERP per participant and condition
+ga = cpsy1197_average_across('data')  % grand average, difference wave, figures
+```
 
 ## If something breaks
 
