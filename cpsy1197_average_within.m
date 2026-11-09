@@ -22,10 +22,13 @@ function erp = cpsy1197_average_within(where)
 % See also FT_TIMELOCKANALYSIS, FT_MATH, CPSY1197_PREPROCESS, CPSY1197_AVERAGE_ACROSS
 
 if nargin < 1, where = 'data'; end
+if isempty(which('ft_defaults'))
+    error(['FieldTrip is not on your MATLAB path. Run addpath with your ' ...
+           'FieldTrip folder, then cpsy1197_check.']);
+end
 
-% A quieter FieldTrip, as in cpsy1197_preprocess: no "the call to ... took"
-% lines, no usage tracker, no "the input is raw data" notes. Your own
-% settings come back when this function ends.
+% A quieter FieldTrip, as in cpsy1197_preprocess. Your own settings come
+% back when this function ends.
 global ft_default %#ok<GVMIS> FieldTrip keeps its defaults in this global
 ftBefore  = ft_default;
 ftRestore = onCleanup(@() restoreft(ftBefore));

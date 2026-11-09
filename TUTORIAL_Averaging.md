@@ -2,7 +2,7 @@
 
 This is the second tutorial, for 10 November. The first one,
 [TUTORIAL.md](TUTORIAL.md), took you from the raw recording to cleaned trials.
-Here you average them: first the trials of each participant, then the
+Here you learn how to average them: first the trials of each participant, then the
 participants. You do not write any new code, and you make no new decisions.
 
 What you need: the `*_clean.mat` file of every participant, which the
@@ -92,7 +92,12 @@ Mean amplitude at Pz, 300 to 600 ms (uV), mean and standard error over 10 partic
   target         13.72  (SE 2.24)
   standard        6.72  (SE 0.97)
   difference      6.99  (SE 1.49)
-Saved data/grandavg_P3b.mat and three figures next to it.
+
+Participants far from the others (more than 2.5 SD from the mean amplitude in the window):
+  target                             2
+  difference: target minus standard  2
+
+Saved data/grandavg_P3b.mat and four figures next to it.
 ```
 
 (FieldTrip adds a line "computing average of avg across 10 subjects" per
@@ -130,13 +135,13 @@ ga = cpsy1197_average_across('data', struct('negativeUp', true, 'minTrials', 20)
 
 | Option | Meaning | Default |
 |---|---|---|
-| `experiment` | `'P3b'`, `'N170'` or `'N400'`; needed only if your `data` folder holds more than one | |
+| `experiment` | `'P3b'`, `'N170'` or `'N400'`; if your `data` folder holds more than one and you give none, you are asked | |
 | `minTrials` | fewest trials per condition a participant needs | 10 |
 | `negativeUp` | `true` draws negative voltages upward, as many ERP papers do | `false` |
 | `channel`, `window` | channel and time window (in seconds) of the figures and amplitudes | ERP CORE's, see above |
 | `save` | `false` writes no files | `true` |
 
-**The three figures.**
+**The four figures.**
 
 ![Grand average of ten P3b participants at Pz](figures/fig16_grandavg_P3b.png)
 
@@ -155,6 +160,15 @@ ga = cpsy1197_average_across('data', struct('negativeUp', true, 'minTrials', 20)
    colour scale and for the difference on its own scale, with
    [`ft_topoplotER`](https://www.fieldtriptoolbox.org/reference/ft_topoplotER/).
    FieldTrip draws positive in warm colours; the scale is in µV.
+4. *Every participant on top of the average.* One panel for each condition
+   and one for the difference wave, at the same channel: a thin grey line per
+   participant, the average thick. A mean can hide that it rests on a few
+   people, and this is where you see it. If the thin lines mostly run with the
+   thick one, the effect is shared. A participant whose mean amplitude in the
+   window lies more than 2.5 standard deviations from the mean of all
+   participants is drawn in red with their number, and listed in the printout.
+   That is a reason to look at that person's data again, not to drop them: you
+   say what you see in your write-up.
 
 The mean amplitude is one number per participant, the average of the ERP over
 the window at the channel, so the standard error in the printout is over
@@ -169,13 +183,19 @@ as a description.
 
 ## 3. If something breaks
 
+**`FieldTrip is not on your MATLAB path. Run addpath with your FieldTrip
+folder, then cpsy1197_check.`** The `addpath` line is needed once per MATLAB
+session, every time you restart MATLAB. Run
+`addpath('/path/to/fieldtrip-20260812')`, then `cpsy1197_check`, then the
+averaging again.
+
 **`No *_clean.mat files in "data". Run cpsy1197_preprocess first.`** The
 scripts look for the cleaned data under the folder you give them. Check that
 you are in the right folder (`pwd`) and that the files exist.
 
-**`The folder holds more than one experiment (N170, P3b). Never average across
-experiments.`** Pass the one you want:
-`cpsy1197_average_across('data', struct('experiment', 'N170'))`.
+**`The folder holds more than one experiment`.** The script lists them and asks
+which one to average; type its number. To skip the question, pass the one you
+want: `cpsy1197_average_across('data', struct('experiment', 'N170'))`.
 
 **`Need at least 2 participants for a grand average`.** After the left-out
 participants were removed, fewer than two were left. Read the lines above the

@@ -11,11 +11,12 @@ function ga = cpsy1197_average_across(where, params)
 % has. The grand average of the difference wave is the mean of the
 % participants' difference waves.
 %
-% It draws three figures. (1) The component's channel, the two conditions
+% It draws four figures. (1) The component's channel, the two conditions
 % and the difference wave, with the standard error across participants as a
 % band around each curve. (2) All channels laid out on the head. (3) The
 % scalp topography of both conditions and the difference in the time
-% window of the component. It prints the mean amplitude in that window and
+% window of the component. (4) Every participant's own ERP at the channel, to
+% see whether a few people drive the average. It prints the mean amplitude in that window and
 % saves grandavg_<experiment>.mat (the variable ga) and the figures in
 % the data folder.
 %
@@ -25,7 +26,7 @@ function ga = cpsy1197_average_across(where, params)
 % appears twice is used once.
 %
 % params (all optional)
-%   experiment  'P3b', 'N170' or 'N400'. Needed only if your folder holds more than one.
+%   experiment  'P3b', 'N170' or 'N400'. If your folder holds more than one and you give none, you are asked.
 %   minTrials   fewest trials per condition a participant needs. Default 10.
 %   negativeUp  true draws negative voltages upward, as in much of the ERP literature. Default false.
 %   channel     channel for figure 1 and the amplitudes. Default: ERP CORE's (Pz, PO8, CPz).
@@ -37,16 +38,14 @@ function ga = cpsy1197_average_across(where, params)
 
 if nargin < 1, where  = 'data'; end
 if nargin < 2, params = struct(); end
-p.experiment = ft_getopt(params, 'experiment', '');
-p.minTrials  = ft_getopt(params, 'minTrials',  10);
-p.negativeUp = ft_getopt(params, 'negativeUp', false);
-p.channel    = ft_getopt(params, 'channel',    '');
-p.window     = ft_getopt(params, 'window',     []);
-p.layout     = ft_getopt(params, 'layout',     fullfile(fileparts(which('ft_defaults')), 'template', 'layout', 'easycapM1.mat'));
-p.save       = ft_getopt(params, 'save',       true);
+if isempty(which('ft_defaults'))
+    error(['FieldTrip is not on your MATLAB path. Run addpath with your ' ...
+           'FieldTrip folder, then cpsy1197_check.']);
+end
 
 % A quieter FieldTrip, as in cpsy1197_preprocess. Your own settings come
-% back when this function ends.
+% back when this function ends. ft_defaults also puts FieldTrip's
+% subfolders on the path, so it has to run before any other FieldTrip call.
 global ft_default %#ok<GVMIS> FieldTrip keeps its defaults in this global
 ftBefore  = ft_default;
 ftRestore = onCleanup(@() restoreft(ftBefore));
@@ -54,6 +53,14 @@ ft_default.showcallinfo = 'no';
 ft_default.trackusage   = false;
 ft_defaults;
 ft_info off; ft_notice off;
+
+p.experiment = ft_getopt(params, 'experiment', '');
+p.minTrials  = ft_getopt(params, 'minTrials',  10);
+p.negativeUp = ft_getopt(params, 'negativeUp', false);
+p.channel    = ft_getopt(params, 'channel',    '');
+p.window     = ft_getopt(params, 'window',     []);
+p.layout     = ft_getopt(params, 'layout',     fullfile(fileparts(which('ft_defaults')), 'template', 'layout', 'easycapM1.mat'));
+p.save       = ft_getopt(params, 'save',       true);
 
 %% ------------------------------------------------------------ FIND THE FILES
 if ~isfolder(where)
@@ -72,10 +79,25 @@ end
 expts = unique(cellfun(@(e) e.experiment, E, 'UniformOutput', false));
 if isempty(p.experiment)
     if numel(expts) > 1
-        error('cpsy1197:average:mixed', ['The folder holds more than one experiment (%s). Never average across experiments.\n' ...
-              'Choose one: cpsy1197_average_across(''%s'', struct(''experiment'', ''%s''))'], strjoin(expts, ', '), where, expts{1});
+        % Experiments are never averaged together, so ask which one to do.
+        if batchStartupOptionUsed
+            error('cpsy1197:average:mixed', ['The folder holds more than one experiment (%s). Never average across experiments.\n' ...
+                  'Choose one: cpsy1197_average_across(''%s'', struct(''experiment'', ''%s''))'], strjoin(expts, ', '), where, expts{1});
+        end
+        fprintf('\nThe folder holds more than one experiment. They are never averaged together.\n');
+        for k = 1:numel(expts)
+            nk = sum(cellfun(@(e) strcmp(e.experiment, expts{k}), E));
+            fprintf('  %d  %-5s (%d participants)\n', k, expts{k}, nk);
+        end
+        choice = [];
+        while ~(isscalar(choice) && ismember(choice, 1:numel(expts)))
+            choice = input(sprintf('Which one? Type 1 to %d, or 0 to stop: ', numel(expts)));
+            if isequal(choice, 0), error('cpsy1197:average:cancelled', 'Stopped, no experiment chosen.'); end
+        end
+        p.experiment = expts{choice};
+    else
+        p.experiment = expts{1};
     end
-    p.experiment = expts{1};
 end
 sel   = cellfun(@(e) strcmp(e.experiment, p.experiment), E);
 E     = E(sel);
@@ -211,6 +233,40 @@ for k = 1:3
     title(sprintf('%s\n%d to %d ms (uV)', ttl{k}, round(p.window(1)*1000), round(p.window(2)*1000)));
 end
 
+% 4. Every participant's own ERP at the channel, on top of the average. If
+% the average is driven by one or two people, you see it here. A participant
+% whose mean amplitude in the window is more than 2.5 standard deviations
+% from the mean of all participants is drawn in red and labelled.
+f4 = figure('Name', 'Individual ERPs', 'Color', 'w', 'Position', [100 100 760 860]);
+ttl4 = {c1, c2, sprintf('difference: %s minus %s', c1, c2)};
+fprintf('\nParticipants far from the others (more than 2.5 SD from the mean amplitude in the window):\n');
+any4 = false;
+for k = 1:3
+    ax = subplot(3, 1, k); hold on;
+    ind = squeeze(ga.individual.(names{k}).individual(:, ci, :));   % participants x time
+    z   = (amp(:,k) - mean(amp(:,k))) ./ std(amp(:,k));
+    far = abs(z) > 2.5;
+    for s = find(~far)'
+        plot(tms, ind(s,:), 'Color', [0.65 0.65 0.65], 'LineWidth', 0.8);
+    end
+    for s = find(far)'
+        plot(tms, ind(s,:), 'Color', [0.80 0.10 0.10], 'LineWidth', 1.3);
+        text(ax, 795, ind(s,end), sprintf('P%d', subjects(s)), 'Color', [0.80 0.10 0.10], ...
+             'FontSize', 8, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+    end
+    plot(tms, src{k}.avg(ci,:), 'Color', col(k,:), 'LineWidth', 2.5);
+    decorate(ax, sprintf('%s, %s (thin: each participant, thick: the average, N = %d)', p.experiment, ttl4{k}, N), p);
+    yl = get(ax, 'YLim');
+    fill(ax, p.window([1 2 2 1])*1000, yl([1 1 2 2]), [0.5 0.5 0.5], 'FaceAlpha', 0.12, ...
+         'EdgeColor', 'none', 'HandleVisibility', 'off');
+    if any(far)
+        fprintf('  %-34s %s\n', ttl4{k}, mat2str(subjects(far)));
+        any4 = true;
+    end
+end
+xlabel(ax, 'time (ms)');
+if ~any4, fprintf('  none\n'); end
+
 %% ------------------------------------------------------------------- SAVING
 if p.save
     base = fullfile(where, ['grandavg_' p.experiment]);
@@ -218,7 +274,8 @@ if p.save
     exportgraphics(f1, [base '_channel.png'], 'Resolution', 150);
     exportgraphics(f2, [base '_allchannels.png'], 'Resolution', 150);
     exportgraphics(f3, [base '_topography.png'], 'Resolution', 150);
-    fprintf('\nSaved %s.mat and three figures next to it.\n', base);
+    exportgraphics(f4, [base '_individual.png'], 'Resolution', 150);
+    fprintf('\nSaved %s.mat and four figures next to it.\n', base);
 end
 fprintf('\n');
 end
