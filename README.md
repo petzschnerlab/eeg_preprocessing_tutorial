@@ -11,6 +11,8 @@ from the real data and the exact console output to compare against, is in
 | `cpsy1197_report.m` | Prints the numbers for your submission. |
 | `cpsy1197_average_within.m` | Averages the trials of each participant, per condition (for 10 November). |
 | `cpsy1197_average_across.m` | Averages the participants into a grand average and draws it (for 10 November). |
+| `cpsy1197_cluster_test.m` | Tests whether the two conditions differ (cluster-based permutation test). |
+| `cpsy1197_cluster_tutorial.m` | A guided tour through the same test, step by step, on your own data. |
 | `TUTORIAL.md` | The walkthrough. Start here. |
 | `TUTORIAL_Averaging.md` | The second walkthrough: averaging, for 10 November. |
 
@@ -66,6 +68,8 @@ The two averaging scripts work on the `_clean.mat` files your preprocessing save
 ```matlab
 cpsy1197_average_within('data')       % one ERP per participant and condition
 ga = cpsy1197_average_across('data')  % grand average, difference wave, figures
+cpsy1197_cluster_tutorial('data')     % guided tour of the statistics (first time)
+stat = cpsy1197_cluster_test('data')  % the test you report
 ```
 
 ## If something breaks
